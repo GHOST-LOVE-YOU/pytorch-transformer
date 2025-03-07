@@ -18,7 +18,8 @@ warnings.filterwarnings("ignore")
 
 config = {
     "batch_size": 8,
-    "num_epochs": 20,
+    "max_iters": 10,
+    "eval_interval": 100,
     "lr": 10**-4,
     "seq_len": 200,
     "d_model": 512,
@@ -191,30 +192,34 @@ def show_test():
         print("")
 
 
-for epoch in range(config["num_epochs"]):
-    torch.cuda.empty_cache()
-    model.train()
-    batch_iterator = tqdm(train_dataloader, desc=f"Processing Epoch {epoch:02d}")
-    for batch in batch_iterator:
-        encoder_input = batch["encoder_input"].to(device)  # (b, seq_len)
-        decoder_input = batch["decoder_input"].to(device)  # (B, seq_len)
-        encoder_mask = batch["encoder_mask"].to(device)  # (B, 1, 1, seq_len)
-        decoder_mask = batch["decoder_mask"].to(device)  # (B, 1, seq_len, seq_len)
-        label = batch["label"].to(device)  # (B, seq_len)
+torch.cuda.empty_cache()
+model.train()
+batch_iterator = tqdm(range(config["max_iters"]))
+for batch_iter in batch_iterator:
+    batch = next(iter(train_dataloader))
+    encoder_input = batch["encoder_input"].to(device)  # (b, seq_len)
+    decoder_input = batch["decoder_input"].to(device)  # (B, seq_len)
+    encoder_mask = batch["encoder_mask"].to(device)  # (B, 1, 1, seq_len)
+    decoder_mask = batch["decoder_mask"].to(device)  # (B, 1, seq_len, seq_len)
+    label = batch["label"].to(device)  # (B, seq_len)
 
-        # Compute the loss using a simple cross entropy
-        logits, loss = model(
-            encoder_input, decoder_input, encoder_mask, decoder_mask, label
-        )
-        batch_iterator.set_postfix({"loss": f"{loss.item():6.3f}"})
+    # Compute the loss using a simple cross entropy
+    logits, loss = model(
+        encoder_input, decoder_input, encoder_mask, decoder_mask, label
+    )
+    batch_iterator.set_postfix({"loss": f"{loss.item():6.3f}"})
 
-        # Backpropagate the loss
-        loss.backward()
+    # Backpropagate the loss
+    loss.backward()
 
-        # Update the weights
-        optimizer.step()
-        optimizer.zero_grad(set_to_none=True)
-    loss = estimate_loss()
-    print(f"step {epoch}: val loss {loss:.4f}")
+    # Update the weights
+    optimizer.step()
+    optimizer.zero_grad(set_to_none=True)
+    if (
+        batch_iter % config["eval_interval"] == 0
+        or batch_iter == config["max_iters"] - 1
+    ):
+        loss = estimate_loss()
+        print(f"step {batch_iter}: val loss {loss:.4f}")
 
 show_test()

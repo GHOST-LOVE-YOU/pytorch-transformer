@@ -178,16 +178,14 @@ class Transformer(nn.Module):
         self.positional_encoding = PositionalEncoding(d_model, seq_len)
 
         # Create the encoder blocks
-        self.encoder_blocks = []
-        for _ in range(N):
-            encoder_block = EncoderBlock(d_model, num_heads)
-            self.encoder_blocks.append(encoder_block)
+        self.encoder_blocks = nn.ModuleList(
+            [EncoderBlock(d_model, num_heads) for _ in range(N)]
+        )
 
         # Create the decoder blocks
-        self.decoder_blocks = []
-        for _ in range(N):
-            decoder_block = DecoderBlock(d_model, num_heads)
-            self.decoder_blocks.append(decoder_block)
+        self.decoder_blocks = nn.ModuleList(
+            [DecoderBlock(d_model, num_heads) for _ in range(N)]
+        )
 
         # layer norm
         self.ec_norm = LayerNormalization(d_model)
