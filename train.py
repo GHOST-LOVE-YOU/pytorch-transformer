@@ -17,9 +17,9 @@ import warnings
 warnings.filterwarnings("ignore")
 
 config = {
-    "batch_size": 8,
-    "max_iters": 10,
-    "eval_interval": 100,
+    "batch_size": 256,
+    "max_iters": 10000,
+    "eval_interval": 2000,
     "lr": 10**-4,
     "seq_len": 200,
     "d_model": 512,
@@ -27,6 +27,7 @@ config = {
     "lang_src": "en",
     "lang_tgt": "zh",
     "tokenizer_file": "tokenizer_{0}.json",
+    "debug": False,
 }
 
 
@@ -159,6 +160,8 @@ def estimate_loss():
             encoder_input, decoder_input, encoder_mask, decoder_mask, label
         )
         losses.append(loss.item())
+        if config["debug"]:
+            break
     return sum(losses) / len(losses)
 
 
@@ -167,10 +170,10 @@ def show_test():
     model.eval()
     count = 0
 
-    batch_iterator = tqdm(val_dataloader, desc="Processing eval")
-
-    for batch in batch_iterator:
+    for batch in test_dataloader:
         count += 1
+        if count > 5:
+            break
         encoder_input = batch["encoder_input"].to(device)  # (b, seq_len)
         encoder_mask = batch["encoder_mask"].to(device)  # (b, 1, seq_len)
 
@@ -215,10 +218,10 @@ for batch_iter in batch_iterator:
     # Update the weights
     optimizer.step()
     optimizer.zero_grad(set_to_none=True)
+
     if (
-        batch_iter % config["eval_interval"] == 0
-        or batch_iter == config["max_iters"] - 1
-    ):
+        batch_iter % config["eval_interval"] == 0 and batch_iter != 0
+    ) or batch_iter == config["max_iters"] - 1:
         loss = estimate_loss()
         print(f"step {batch_iter}: val loss {loss:.4f}")
 

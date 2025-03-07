@@ -153,7 +153,9 @@ class DecoderBlock(nn.Module):
         self.self_attention_block = MultiHeadAttention(d_model, num_heads)
         self.cross_attention_block = MultiHeadAttention(d_model, num_heads)
         self.feed_forward_block = FeedForwardBlock(d_model)
-        self.residual_connections = [ResidualConnection(d_model) for _ in range(3)]
+        self.residual_connections = nn.ModuleList(
+            [ResidualConnection(d_model) for _ in range(3)]
+        )
 
     def forward(self, x, encoder_out, src_mask, tgt_mask):
         x = self.residual_connections[0](
@@ -235,12 +237,20 @@ class Transformer(nn.Module):
         memory = self.encode(src, src_mask)
         memory = memory.to(device)
 
-        decoder_input = torch.ones(1, 1).fill_(1).type(torch.long).to(device)
+        decoder_input = (
+            torch.ones(1, 1)
+            .fill_(tgt_tokenizer.token_to_id("[SOS]"))
+            .type(torch.long)
+            .to(device)
+        )
         for i in range(max_len - 1):
-            decoder_mask = causal_mask(i + 1).type(torch.int)
+            decoder_mask = causal_mask(i + 1).type(torch.int).to(device)
             out = self.decode(decoder_input, memory, src_mask, decoder_mask)
-            prob = self.projection_layer(out[:, -1])
-            _, next_word = torch.max(prob, dim=1)
+            prob = self.projection_layer(out[:, i])
+            prob = F.softmax(prob, dim=-1)  # (B, C)
+
+            next_word = torch.multinomial(prob, num_samples=1)
+
             decoder_input = torch.cat(
                 [
                     decoder_input,
