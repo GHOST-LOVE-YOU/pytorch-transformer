@@ -18,8 +18,8 @@ warnings.filterwarnings("ignore")
 
 config = {
     "batch_size": 64,
-    "max_iters": 10000,
-    "eval_interval": 2000,
+    "max_iters": 100000,
+    "eval_interval": 20000,
     "lr": 10**-4,
     "seq_len": 200,
     "d_model": 512,
