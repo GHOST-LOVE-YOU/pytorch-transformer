@@ -17,7 +17,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 config = {
-    "batch_size": 256,
+    "batch_size": 64,
     "max_iters": 10000,
     "eval_interval": 2000,
     "lr": 10**-4,
