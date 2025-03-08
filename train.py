@@ -26,6 +26,7 @@ config = {
     "datasource": "Helsinki-NLP/opus-100",
     "lang_src": "en",
     "lang_tgt": "zh",
+    "cache_dir": "./data",
     "tokenizer_file": "tokenizer_{0}.json",
     "debug": False,
 }
@@ -55,16 +56,19 @@ train_dataset = load_dataset(
     f"{config['datasource']}",
     f"{config['lang_src']}-{config['lang_tgt']}",
     split="train",
+    cache_dir=config["cache_dir"],
 )
 val_dataset = load_dataset(
     f"{config['datasource']}",
     f"{config['lang_src']}-{config['lang_tgt']}",
     split="validation",
+    cache_dir=config["cache_dir"],
 )
 test_dataset = load_dataset(
     f"{config['datasource']}",
     f"{config['lang_src']}-{config['lang_tgt']}",
     split="test",
+    cache_dir=config["cache_dir"],
 )
 
 
