@@ -1,4 +1,13 @@
-python ./train.py 
+## introduction
+
+This project replicates the classic paper [Attention is All You Need](https://arxiv.org/abs/1706.03762), selecting the English-to-Chinese translation task and using the [opus-100](https://huggingface.co/datasets/Helsinki-NLP/opus-100) dataset. Since the primary goal of this project is to reproduce the paper and validate certain ideas, many engineering steps such as checkpointing and monitoring have been omitted. It’s important to note that the code does not save the model.
+
+Due to limited resources, training was conducted for only 9 hours on a single 4090 GPU. Since the results met expectations, the full training process was not completed.
+
+## quick glance
+
+```text
+python ./train.py
 Using device: cuda
 Device name: NVIDIA GeForce RTX 4090
 Device memory: 23.64971923828125 GB
@@ -46,3 +55,23 @@ model_out_text: J . 加强 非洲 统计 系统 ， 编写 基于性别 分列 �
 source_text: Achieving their expeditious entry into force and global implementation is a major task for IMO in order to advance the fight against international terrorism, and their implementation is referenced in more than one planned output in the Organization's High-Level Action Plan.
 target_text: 议定书尽快生效并得到普遍执行，是海事组织在推动打击国际恐怖主义方面的重大任务，海事组织《高级行动计划》几个计划产出都提到了这两项议定书的执行工作。
 model_out_text: 3 . 为了实现 一旦 进入 全球 的 形势 下 ， 海事组织 的一项 重大 任务 就是 ， 推动 打击国际恐怖主义 的斗争 ， 其 执行 受到 本组织 迄今为止 一个 高级别 行动计划 中的一 项目标 产出 具体 规定的 归 类 。
+```
+
+## quick start
+
+```bash
+git clone https://github.com/GHOST-LOVE-YOU/pytorch-transformer.github
+cd pytorch-transformer
+# optional start | linux only
+python -m venv myenv
+source myenv/bin/activate
+# optional end
+pip install -r requirements.txt
+python ./train.py
+```
+
+## thanks
+
+- [Umar Jamil](https://www.youtube.com/watch?v=ISNdQcPhsts)
+- [Andrej Karpathy](https://www.youtube.com/watch?v=kCc8FmEb1nY)
+- [Attention is all you need](https://arxiv.org/abs/1706.03762)
